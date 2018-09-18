@@ -24,8 +24,16 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
     constructor() ERC721Token("Pet", "DG") public {}
 
     function mint() external onlyOwner {
-        uint256 newPetId = _createPet(_generateRandomDna("PET TEST"));
+        uint256 newPetId = _createPet(_generateRandomDna("PET RELEASE"));
         super._mint(msg.sender, newPetId);
+    }
+
+    // テスト用コード
+    function test_mint() public {
+        for (uint i = 0; i < 5; i++) {
+            uint256 newPetId = _createPet(_generateRandomDna("PET TEST"));
+            super._mint(msg.sender, newPetId);
+        }
     }
 
     function buyPet(uint _petId) payable public {
