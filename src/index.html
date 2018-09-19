@@ -1,27 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<!--<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>-->
-<script src="js/web3.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script type="text/javascript">
-    const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
-    let coinbase = web3.eth.accounts[0];
-    const address = "0x0a54ca767f704520e20a3f8b137f4ad035651c78"
-    $.getJSON('Petshop.json', function(data) {
-        const contract = web3.eth.contract(data.abi).at(address);
-        let name = contract.name.call();
-        console.log("name:", name);
-        tokens = contract.getAllTokens();
-        console.log("tokens:", tokens);
-        for(var i = 0; i < tokens.length; i++) {
-          const pet = contract.getPet(i);
-          console.log(`Pet : ${pet}`);
-        }
-    });
-</script>
-    <title>Title</title>
-</head>
-<body></body>
+  <head>
+    <meta charset="UTF-8">
+    <title>PetShop</title>
+    <link href="css/stylesheet.css" rel="stylesheet">
+    <script src="js/web3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+  </head>
+  <body>
+    <input type="button" name="debug-log" value="ペットデータ確認" onClick="init()">
+    <input type="button" name="mint" value="ペット生成" onClick="mint()">
+    <div id="output"></div>
+
+    <div class="header">
+      <div class="header-logo">PetShop</div>
+      
+      <div class="header-list">
+        <ul>
+          <li>ペット一覧</li>
+          <li>お問い合わせ</li>
+        </ul>
+      </div>
+    </div>
+
+    
+
+    <div id="petsRow" class="row">
+        <!-- PETS LOAD HERE -->
+    </div>
+
+    <div id="petTemplate" style="display: none;">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="panel panel-default panel-pet">
+          <div class="panel-heading">
+            <h3 class="panel-title">Scrappy</h3>
+          </div>
+          <div class="panel-body">
+            <img alt="140x140" data-src="holder.js/140x140" class="img-rounded img-center" style="width: 100%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg" data-holder-rendered="true">
+            <br/><br/>
+            <strong>Breed</strong>: <span class="pet-breed">Golden Retriever</span><br/>
+            <strong>Age</strong>: <span class="pet-age">3</span><br/>
+            <strong>Location</strong>: <span class="pet-location">Warren, MI</span><br/><br/>
+            <button class="btn btn-default btn-adopt" type="button" data-id="0">購入</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+
+    
+
+    <div class="contents">
+      <h2 class="section-title">ペット一覧</h2>
+      <div class="contents-item">
+          <img src="images/01.jpeg">
+          <li>${pet.genes}</li>
+      </div>
+    </div>
+  </body>
 </html>
