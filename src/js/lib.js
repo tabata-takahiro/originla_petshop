@@ -48,3 +48,22 @@ const pref={
     '46':'鹿児島県',
     '47':'沖縄県'
 }
+
+/**
+ * DNAから出身地を返す
+ * @param {number} dna - DNA
+ * @returns {string} - 出身地
+ */
+function getPrefecture(dna) {
+    let prefecture_id = String(dna).substring(2, 4)|0 % 47 + 1
+    return pref[String(prefecture_id).padStart(2, '0')]
+}
+
+/**
+ * DNAから犬種キーを返す
+ * @param {number} dna - DNA
+ * @returns {number} - 犬種キー
+ */
+function getBreedKey(dna) {
+    return String(dna).substring(0, 2)|0 % 4;
+}
