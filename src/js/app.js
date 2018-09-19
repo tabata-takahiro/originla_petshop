@@ -25,11 +25,11 @@ function init() {
       console.log(`出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
 
       // petの要素数１つ目が遺伝子情報
-      petTemplate.find('.panel-title').text(pet[0]);
-      //petTemplate.find('img').attr('src', pet);
-      petTemplate.find('.pet-breed').text("柴犬");
+      petTemplate.find('.panel-title').text(`名前 : ${pet[0]}ちゃん`);
+      petTemplate.find('img').attr('src', `images/${getBreedKey(pet[0])}.jpeg`);
+      petTemplate.find('.pet-breed').text(getBreed(getBreedKey(pet[0])));
       petTemplate.find('.pet-age').text(pet[2]);
-      petTemplate.find('.pet-location').text("日本");
+      petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
       //petTemplate.find('.btn-adopt').attr('data-id', pet);
       petsRow.append(petTemplate.html());
     }
@@ -95,13 +95,19 @@ const pref={
   '47':'沖縄県'
 }
 
+const breed = {
+  '0':'Scottish Terrier',
+  '1':'French Bulldog',
+  '2':'Boxer',
+  '3':'Golden Retriever'
+}
 /**
 * DNAから出身地を返す
 * @param {number} dna - DNA
 * @returns {string} - 出身地
 */
 function getPrefecture(dna) {
-  let prefecture_id = String(dna).substring(2, 4)|0 % 47 + 1
+  let prefecture_id = String(dna).substring(2, 3)% 47 + 1
   return pref[String(prefecture_id).padStart(2, '0')]
 }
 
@@ -111,5 +117,9 @@ function getPrefecture(dna) {
 * @returns {number} - 犬種キー
 */
 function getBreedKey(dna) {
-  return String(dna).substring(0, 2)|0 % 4;
+  return String(dna).substring(0, 1) % 4;
+}
+
+function getBreed(breedKey) {
+  return breed[breedKey]
 }
