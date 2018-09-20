@@ -1,6 +1,6 @@
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
-const address = "0xe43e50beca4923c26e81276bd276f45edbdfb0a6"
-const coinbase = web3.eth.accounts[0];
+const address = "0x69fe515c228dc637cb2a044e21e3ddef52a4dbc1" // コントラクトのアドレス
+const coinbase = web3.eth.accounts[0]; // コントラクトを呼び出すアカウントのアドレス
 var contract;
 
 // 初期化
@@ -9,7 +9,10 @@ function init() {
   var petTemplate = $('#petTemplate');
   $.getJSON('Petshop.json', function(data) {
     contract = web3.eth.contract(data.abi).at(address);
+
     console.log("contract : ", contract);
+    console.log("coinbase : ", coinbase);
+
     let name = contract.name.call();
     tokens = contract.getAllTokens();
     for(var i = 0; i < tokens.length; i++) {
@@ -22,7 +25,7 @@ function init() {
       // 犬種
       getBreedKey(pet[0]);
 
-      console.log(`出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
+      console.log(`ID : ${i} 出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
 
       // petの要素数１つ目が遺伝子情報
       petTemplate.find('.panel-title').text(`名前 : ${pet[0]}ちゃん`);
@@ -30,7 +33,7 @@ function init() {
       petTemplate.find('.pet-breed').text(getBreed(getBreedKey(pet[0])));
       petTemplate.find('.pet-age').text(pet[2]);
       petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
-      //petTemplate.find('.btn-adopt').attr('data-id', pet);
+      petTemplate.find('.btn-adopt').attr('id', i);
       petsRow.append(petTemplate.html());
     }
   });
@@ -38,10 +41,7 @@ function init() {
 
 // ペット生成(オーナーのみ)
 function mint() {
-  $.getJSON('Petshop.json', function(data) {
-    owner = web3.eth.contract(data.abi).at(contract);
-    owner.test_mint();
-  });
+  contract.mint();
 }
 
 // 都道府県コード
@@ -120,6 +120,19 @@ function getBreedKey(dna) {
   return String(dna).substring(0, 1) % 4;
 }
 
+// 犬種キーを元に犬種を返す
 function getBreed(breedKey) {
   return breed[breedKey]
+}
+
+// ペット購入
+function buyPet(selectObj) {
+  const petId = selectObj.id; // eleのプロパティとしてidを取得
+  //contract.buyPet(petId);
+  console.log(`${petId}のペットを購入`);
+}
+
+function getId(selectObj){
+  const petId = selectObj.id; // eleのプロパティとしてidを取得
+  console.log(petId); //「id01」
 }

@@ -28,7 +28,7 @@
         <h2 class="section-title">ペット一覧</h2>
 
     <div id="petsRow" class="row">
-        <!-- PETS LOAD HERE -->
+
     </div>
 
     <div id="petTemplate" style="display: none;">
@@ -39,17 +39,15 @@
           </div>
           <div class="panel-body">
             <img alt="40x40" data-src="holder.js/40x40" class="img-rounded img-center" style="width: 50%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg" data-holder-rendered="true">
+            <br/><br/>            
+            <input class="btn-adopt" type="button" id="id01" value="購入" onclick="buyPet(this);">
+            <input class="btn-adopt" type="button" id="id01" value="show id" onclick="getId(this);">
             <br/><br/>
-            <strong>Breed</strong>: <span class="pet-breed">Golden Retriever</span><br/>
-            <strong>Age</strong>: <span class="pet-age">3</span><br/>
-            <strong>Location</strong>: <span class="pet-location">Warren, MI</span><br/><br/>
-            <button class="btn btn-default btn-adopt" type="button" data-id="0">購入
-
-            </button>
+            <strong>犬種</strong>: <span class="pet-breed">Golden Retriever</span><br/>
+            <strong>年齢</strong>: <span class="pet-age">3</span><br/>
+            <strong>出身</strong>: <span class="pet-location">Warren, MI</span><br/><br/>
           </div>
-        </div>
-      </div>
-    </div>  
+        </div>  
       </div>
     </div>
   </body>
