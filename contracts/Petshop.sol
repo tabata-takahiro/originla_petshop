@@ -25,24 +25,27 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
 
     function mint() external onlyOwner {
         uint256 newPetId = _createPet(_generateRandomDna("PET RELEASE"));
-        address first_owner = address(this);
-        super._mint(first_owner, newPetId);
+//        address first_owner = address(this);
+//        super._mint(first_owner, newPetId);
+        super._mint(msg.sender, newPetId);
     }
 
     // テスト用コード
     function test_mint() public {
-        address first_owner = address(this);
+//        address first_owner = address(this);
         for (uint i = 0; i < 5; i++) {
             uint256 newPetId = _createPet(_generateRandomDna("PET TEST"));
-            super._mint(first_owner, newPetId);
+//            super._mint(first_owner, newPetId);
+            super._mint(msg.sender, newPetId);
         }
     }
 
     function buyPet(uint _petId) payable public {
         address seller = ownerOf(_petId);
         require(seller != address(0));
-//        require(seller != address(this));
-        require(seller == address(this));
+        require(seller != address(this));
+        require(seller != msg.sender);
+//        require(seller == address(this));
         require(pets[_petId].price == msg.value);
 //        require(msg.sender == getApproved(_petId));
         require(pets[_petId].soldFlg == 0);
@@ -50,6 +53,7 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
 
         pets[_petId].soldFlg = 1;
         transferFrom(seller, msg.sender, _petId);
+        seller.transfer(msg.value);
 //        transfer(msg.sender, _petId);
     }
 
