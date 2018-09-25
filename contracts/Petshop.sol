@@ -20,7 +20,7 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         uint16 soldFlg;
     }
     Pet[] public pets;
-    uint256 private price = 1 ether;
+    uint256 private price = 0.01 ether;
     constructor() ERC721Token("Pet", "DG") public {}
 
     function mint() external onlyOwner {
