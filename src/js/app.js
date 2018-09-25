@@ -1,5 +1,5 @@
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
-const address = "0x69fe515c228dc637cb2a044e21e3ddef52a4dbc1" // コントラクトのアドレス
+const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf" // コントラクトのアドレス
 const coinbase = web3.eth.accounts[0]; // コントラクトを呼び出すアカウントのアドレス
 var contract;
 
@@ -7,41 +7,48 @@ var contract;
 function init() {
   var petsRow = $('#petsRow');
   var petTemplate = $('#petTemplate');
+
   $.getJSON('Petshop.json', function(data) {
     contract = web3.eth.contract(data.abi).at(address);
-
-    console.log("contract : ", contract);
-    console.log("coinbase : ", coinbase);
-
-    let name = contract.name.call();
     tokens = contract.getAllTokens();
+
     for(var i = 0; i < tokens.length; i++) {
       pet = contract.getPet(i);
-      window.alert(`トークン一覧\n${pet}`);
-
       // 出身
       getPrefecture(pet[0]);
-
       // 犬種
       getBreedKey(pet[0]);
-
-      console.log(`ID : ${i} 出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
-
       // petの要素数１つ目が遺伝子情報
-      petTemplate.find('.panel-title').text(`名前 : ${pet[0]}ちゃん`);
+      petTemplate.find(`.pet-id`).text(`No : ${i + 1}`);
+      petTemplate.find('.panel-title').text(`${pet[0]}ちゃん`);
       petTemplate.find('img').attr('src', `images/${getBreedKey(pet[0])}.jpeg`);
       petTemplate.find('.pet-breed').text(getBreed(getBreedKey(pet[0])));
       petTemplate.find('.pet-age').text(pet[2]);
       petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
+      petTemplate.find('.pet-price').text(`${pet[3]}`);
       petTemplate.find('.btn-adopt').attr('id', i);
       petsRow.append(petTemplate.html());
     }
   });
 }
 
+// すべてのペット確認
+function popUpAllPet() {
+  $.getJSON('Petshop.json', function(data) {
+    contract = web3.eth.contract(data.abi).at(address);
+
+    for(var i = 0; i < tokens.length; i++) {
+      pet = contract.getPet(i);
+      window.alert(`トークン一覧\n${pet}`);
+      console.log(`ID : ${i} 出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
+    }
+  });
+}
+
 // ペット生成(オーナーのみ)
 function mint() {
-  contract.mint();
+  contract.mint.sendTransaction({from:coinbase, gas:3000000});
+  window.location.reload();
 }
 
 // 都道府県コード
@@ -127,12 +134,12 @@ function getBreed(breedKey) {
 
 // ペット購入
 function buyPet(selectObj) {
-  const petId = selectObj.id; // eleのプロパティとしてidを取得
-  //contract.buyPet(petId);
+  const petId = selectObj.id; // ペットidを取得
   console.log(`${petId}のペットを購入`);
+  contract.buyPet.sendTransaction(petId, {value: web3.toWei(0.01, "ether"), gas:3000000});
 }
 
 function getId(selectObj){
-  const petId = selectObj.id; // eleのプロパティとしてidを取得
+  const petId = selectObj.id; // ペットidを取得
   console.log(petId); //「id01」
 }
