@@ -1,13 +1,13 @@
 const address = "0x013aac85ebc9b2a155de1cbd71c0d5ad773881e3" // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
-var contract;
+let contract;
 let tokens;
 
 // 初期化
 function init() {
-  var petsRow = $('#petsRow');
-  var petTemplate = $('#petTemplate');
+    let petsRow = $('#petsRow');
+    let petTemplate = $('#petTemplate');
 
   $.getJSON('Petshop.json', function(data) {
     if (typeof web3 !== 'undefined') {
@@ -23,24 +23,27 @@ function init() {
       } else {
         console.log('Please login.');
       }
-    })
+    });
 
+    let now = new Date()
     contract = web3js.eth.contract(data.abi).at(address);
     contract.getAllTokens.call(function(err, res) {
       tokens = res;
       console.log(tokens.length);
-      for(var i = 0; i < tokens.length; i++) {
+      for(let i = 0; i < tokens.length; i++) {
         console.log('id:' + tokens[i]);
-        let token_id = tokens[i]
+        let token_id = tokens[i];
         contract.getPet(token_id, function(error, result) {
           let pet = result;
+          let d = new Date(pet[2] * 1000);
+          let price = web3js.fromWei(pet[3], 'ether');
           petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
           petTemplate.find('.panel-title').text(`${pet[0]}ちゃん`);
           petTemplate.find('img').attr('src', `images/${getBreedKey(pet[0])}.jpeg`);
           petTemplate.find('.pet-breed').text(getBreed(getBreedKey(pet[0])));
-          petTemplate.find('.pet-age').text(pet[2]);
+          petTemplate.find('.pet-age').text(now.getFullYear() - d.getFullYear());
           petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
-          petTemplate.find('.pet-price').text(`${pet[3]}`);
+          petTemplate.find('.pet-price').text(price);
           petTemplate.find('.btn-adopt').attr('id', token_id);
           petsRow.append(petTemplate.html());
         })
