@@ -1,8 +1,9 @@
-const address = "0x8469754b9d0ee46b1b87c1ed6e29cb0af46b5e5c"; // コントラクトのアドレス
+const address = "0x2ee3c9f2ead1e2d4174cfa8863dacfe3a11309d0" // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
 let tokens;
+let price;
 
 // 初期化
 function init() {
@@ -28,9 +29,10 @@ function init() {
     contract = web3js.eth.contract(data.abi).at(address);
     contract.getAllTokens.call(function(err, res) {
       tokens = res;
-      console.log(tokens.length);
+      if(tokens.length <= 0) {
+        window.alert("ペットがいません");
+      }
       for(let i = 0; i < tokens.length; i++) {
-        console.log('id:' + tokens[i]);
         let token_id = tokens[i];
         contract.getPet(token_id, function(error, result) {
           let pet = result;
@@ -45,6 +47,7 @@ function init() {
           petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
           petTemplate.find('.pet-price').text(price);
           petTemplate.find('.btn-adopt').attr('id', token_id);
+          petTemplate.find('.btn-adopt').attr('data-price', pet[3]);
           petsRow.append(petTemplate.html());
         })
       }
@@ -57,11 +60,10 @@ function init() {
 function popUpAllPet() {
   $.getJSON('Petshop.json', function(data) {
     contract = web3js.eth.contract(data.abi).at(address);
-
     for(var i = 0; i < tokens.length; i++) {
-      pet = contract.getPet(i);
-      window.alert(`トークン一覧\n${pet}`);
-      console.log(`ID : ${i} 出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
+      pet = contract.getPet(i ,function(err,result){
+        window.alert(`ID : ${i} 出身 : ${getPrefecture(result[0])} 犬種 : ${getBreedKey(result[0])}`);
+      })
     }
   });
 }
@@ -134,21 +136,22 @@ const breed = {
   '2':'Boxer',
   '3':'Golden Retriever'
 };
+
 /**
- * DNAから出身地を返す
- * @param {number} dna - DNA
- * @returns {string} - 出身地
- */
+* DNAから出身地を返す
+* @param {number} dna - DNA
+* @returns {string} - 出身地
+*/
 function getPrefecture(dna) {
   let prefecture_id = String(dna).substring(2, 3)% 47 + 1;
   return pref[String(prefecture_id).padStart(2, '0')];
 }
 
 /**
- * DNAから犬種キーを返す
- * @param {number} dna - DNA
- * @returns {number} - 犬種キー
- */
+* DNAから犬種キーを返す
+* @param {number} dna - DNA
+* @returns {number} - 犬種キー
+*/
 function getBreedKey(dna) {
   return String(dna).substring(0, 1) % 4;
 }
@@ -160,9 +163,11 @@ function getBreed(breedKey) {
 
 // ペット購入
 function buyPet(selectObj) {
-  const petId = selectObj.id; // ペットidを取得
-  console.log(`${petId}のペットを購入`);
-  contract.buyPet.sendTransaction(petId, {value: web3js.toWei(0.01, "ether"), gas:3000000}, function(err, result) {
+  let petId = selectObj.id;
+  let price = selectObj.getAttribute('data-price');
+  console.log(`${petId}のペットを購入 値段 : ${price} eth`);
+  contract.buyPet.sendTransaction(petId, {value: web3js.toWei(price, "ether"), gas:3000000}, 
+  function(err, result) {
     if (!err) console.log(result);
   });
 }
