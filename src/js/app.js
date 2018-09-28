@@ -1,9 +1,8 @@
-const address = "0x2ee3c9f2ead1e2d4174cfa8863dacfe3a11309d0" // コントラクトのアドレス
+const address = "0xdb25c116baea2a95f19fcb078ff7a9394ece50b9" // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
 let tokens;
-let price;
 
 // 初期化
 function init() {
@@ -138,20 +137,20 @@ const breed = {
 };
 
 /**
-* DNAから出身地を返す
-* @param {number} dna - DNA
-* @returns {string} - 出身地
-*/
+ * DNAから出身地を返す
+ * @param {number} dna - DNA
+ * @returns {string} - 出身地
+ */
 function getPrefecture(dna) {
   let prefecture_id = String(dna).substring(2, 3)% 47 + 1;
   return pref[String(prefecture_id).padStart(2, '0')];
 }
 
 /**
-* DNAから犬種キーを返す
-* @param {number} dna - DNA
-* @returns {number} - 犬種キー
-*/
+ * DNAから犬種キーを返す
+ * @param {number} dna - DNA
+ * @returns {number} - 犬種キー
+ */
 function getBreedKey(dna) {
   return String(dna).substring(0, 1) % 4;
 }
@@ -166,7 +165,7 @@ function buyPet(selectObj) {
   let petId = selectObj.id;
   let price = selectObj.getAttribute('data-price');
   console.log(`${petId}のペットを購入 値段 : ${price} eth`);
-  contract.buyPet.sendTransaction(petId, {value: web3js.toWei(price, "ether"), gas:3000000}, 
+  contract.buyPet.sendTransaction(petId, {value: price, gas:3000000},
   function(err, result) {
     if (!err) console.log(result);
   });
