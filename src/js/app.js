@@ -47,6 +47,7 @@ function init() {
           petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
           petTemplate.find('.pet-price').text(price);
           petTemplate.find('.btn-adopt').attr('id', token_id);
+          petTemplate.find('.btn-adopt').attr('data-price', pet[3]);
           petsRow.append(petTemplate.html());
         })
       }
@@ -162,18 +163,11 @@ function getBreed(breedKey) {
 
 // ペット購入
 function buyPet(selectObj) {
-  const petId = selectObj.id; // ペットidを取得
-  pet = contract.getPet(petId, function(err, result) {
-    if(!err) {
-      const petPrice = web3js.fromWei(result[3], 'ether');
-      console.log(`${petId}のペットを購入 値段 : ${petPrice} eth`);
-      contract.buyPet.sendTransaction(petId, {value: web3js.toWei(petPrice, "ether"), gas:3000000}, 
-      function(err, result) {
-        if (!err) console.log(result);
-      })
-    } else {
-      console.log('err:' + err);
-    }
+  let price = selectObj.getAttribute('data-price');
+  console.log(`${petId}のペットを購入 値段 : ${price} eth`);
+  contract.buyPet.sendTransaction(petId, {value: web3js.toWei(price, "ether"), gas:3000000}, 
+  function(err, result) {
+    if (!err) console.log(result);
   });
 }
 
