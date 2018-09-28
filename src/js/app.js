@@ -38,7 +38,7 @@ function init() {
           let pet = result;
           let d = new Date(pet[2] * 1000);
           let age = elapsedDays(d);
-          price = web3js.fromWei(pet[3], 'ether');
+          let price = web3js.fromWei(pet[3], 'ether');
           petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
           petTemplate.find('.panel-title').text(`${pet[1]}`);
           petTemplate.find('img').attr('src', `images/${getBreedKey(pet[0])}.jpeg`);
