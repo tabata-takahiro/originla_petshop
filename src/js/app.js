@@ -47,6 +47,10 @@ function init() {
           petTemplate.find('.pet-price').text(price);
           petTemplate.find('.btn-adopt').attr('id', token_id);
           petTemplate.find('.btn-adopt').attr('data-price', pet[3]);
+          if (pet[4] > 0) {
+            petTemplate.find('.btn-adopt').attr('disabled', true);
+            petTemplate.find('.btn-adopt').attr('value', "SOLD OUT");
+          }
           petsRow.append(petTemplate.html());
         })
       }
