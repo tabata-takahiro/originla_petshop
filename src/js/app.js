@@ -3,6 +3,7 @@ let coinbase = null; // コントラクトを呼び出すアカウントのア�
 let web3js;
 let contract;
 let tokens;
+let isOwner = false;  // コントラクトのオーナーかどうか
 
 // 初期化
 function init() {
@@ -26,6 +27,10 @@ function init() {
     });
 
     contract = web3js.eth.contract(data.abi).at(address);
+    contract.owner.call(function(err, result) {
+      isOwner = result == coinbase;
+      if (!isOwner) $('#mint').attr('disabled', true);
+    });
     contract.getAllTokens.call(function(err, res) {
       tokens = res;
       if(tokens.length <= 0) {
@@ -47,9 +52,10 @@ function init() {
           petTemplate.find('.pet-price').text(price);
           petTemplate.find('.btn-adopt').attr('id', token_id);
           petTemplate.find('.btn-adopt').attr('data-price', pet[3]);
-          if (pet[4] > 0) {
+          if (isOwner || pet[4] > 0) {
             petTemplate.find('.btn-adopt').attr('disabled', true);
-            petTemplate.find('.btn-adopt').attr('value', "SOLD OUT");
+            if (pet[4] > 0)
+              petTemplate.find('.btn-adopt').attr('value', "SOLD OUT");
           }
           petsRow.append(petTemplate.html());
         })
