@@ -46,6 +46,7 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         require(seller != address(0));
         require(seller != address(this));
         require(seller != msg.sender);
+        require(msg.sender.balance >= msg.value);
         require(pets[_petId].price == msg.value);
         require(pets[_petId].soldFlg == 0);
 
