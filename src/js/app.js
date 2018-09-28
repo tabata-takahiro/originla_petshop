@@ -1,8 +1,9 @@
-const address = "0x013aac85ebc9b2a155de1cbd71c0d5ad773881e3" // コントラクトのアドレス
+const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf" // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
 let tokens;
+let price;
 
 // 初期化
 function init() {
@@ -29,14 +30,15 @@ function init() {
     contract = web3js.eth.contract(data.abi).at(address);
     contract.getAllTokens.call(function(err, res) {
       tokens = res;
-      console.log(tokens.length);
+      if(tokens.length <= 0) {
+        window.alert("ペットがいません");
+      }
       for(let i = 0; i < tokens.length; i++) {
-        console.log('id:' + tokens[i]);
         let token_id = tokens[i];
         contract.getPet(token_id, function(error, result) {
           let pet = result;
           let d = new Date(pet[2] * 1000);
-          let price = web3js.fromWei(pet[3], 'ether');
+          price = web3js.fromWei(pet[3], 'ether');
           petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
           petTemplate.find('.panel-title').text(`${pet[0]}ちゃん`);
           petTemplate.find('img').attr('src', `images/${getBreedKey(pet[0])}.jpeg`);
@@ -57,11 +59,10 @@ function init() {
 function popUpAllPet() {
   $.getJSON('Petshop.json', function(data) {
     contract = web3js.eth.contract(data.abi).at(address);
-
     for(var i = 0; i < tokens.length; i++) {
-      pet = contract.getPet(i);
-      window.alert(`トークン一覧\n${pet}`);
-      console.log(`ID : ${i} 出身 : ${getPrefecture(pet[0])} 犬種 : ${getBreedKey(pet[0])}`);
+      pet = contract.getPet(i ,function(err,result){
+        window.alert(`ID : ${i} 出身 : ${getPrefecture(result[0])} 犬種 : ${getBreedKey(result[0])}`);
+      })
     }
   });
 }
@@ -161,9 +162,17 @@ function getBreed(breedKey) {
 // ペット購入
 function buyPet(selectObj) {
   const petId = selectObj.id; // ペットidを取得
-  console.log(`${petId}のペットを購入`);
-  contract.buyPet.sendTransaction(petId, {value: web3js.toWei(0.01, "ether"), gas:3000000}, function(err, result) {
-    if (!err) console.log(result);
+  pet = contract.getPet(petId, function(err, result) {
+    if(!err) {
+      const petPrice = web3js.fromWei(result[3], 'ether');
+      console.log(`${petId}のペットを購入 値段 : ${petPrice} eth`);
+      contract.buyPet.sendTransaction(petId, {value: web3js.toWei(petPrice, "ether"), gas:3000000}, 
+      function(err, result) {
+        if (!err) console.log(result);
+      })
+    } else {
+      console.log('err:' + err);
+    }
   });
 }
 
