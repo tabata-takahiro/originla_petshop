@@ -163,6 +163,7 @@ function getBreed(breedKey) {
 
 // ペット購入
 function buyPet(selectObj) {
+  let petId = selectObj.id;
   let price = selectObj.getAttribute('data-price');
   console.log(`${petId}のペットを購入 値段 : ${price} eth`);
   contract.buyPet.sendTransaction(petId, {value: web3js.toWei(price, "ether"), gas:3000000}, 
