@@ -1,4 +1,4 @@
-const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf" // コントラクトのアドレス
+const address = "0xe43e50beca4923c26e81276bd276f45edbdfb0a6" // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -26,7 +26,6 @@ function init() {
       }
     });
 
-    let now = new Date()
     contract = web3js.eth.contract(data.abi).at(address);
     contract.getAllTokens.call(function(err, res) {
       tokens = res;
@@ -38,12 +37,13 @@ function init() {
         contract.getPet(token_id, function(error, result) {
           let pet = result;
           let d = new Date(pet[2] * 1000);
+          let age = elapsedDays(d);
           price = web3js.fromWei(pet[3], 'ether');
           petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
-          petTemplate.find('.panel-title').text(`${pet[0]}ちゃん`);
+          petTemplate.find('.panel-title').text(`${pet[1]}`);
           petTemplate.find('img').attr('src', `images/${getBreedKey(pet[0])}.jpeg`);
           petTemplate.find('.pet-breed').text(getBreed(getBreedKey(pet[0])));
-          petTemplate.find('.pet-age').text(now.getFullYear() - d.getFullYear());
+          petTemplate.find('.pet-age').text(age);
           petTemplate.find('.pet-location').text(getPrefecture(pet[0]));
           petTemplate.find('.pet-price').text(price);
           petTemplate.find('.btn-adopt').attr('id', token_id);
@@ -127,22 +127,23 @@ const pref={
   '45':'宮崎県',
   '46':'鹿児島県',
   '47':'沖縄県'
-}
+};
 
 const breed = {
   '0':'Scottish Terrier',
   '1':'French Bulldog',
   '2':'Boxer',
   '3':'Golden Retriever'
-}
+};
+
 /**
 * DNAから出身地を返す
 * @param {number} dna - DNA
 * @returns {string} - 出身地
 */
 function getPrefecture(dna) {
-  let prefecture_id = String(dna).substring(2, 3)% 47 + 1
-  return pref[String(prefecture_id).padStart(2, '0')]
+  let prefecture_id = String(dna).substring(2, 3)% 47 + 1;
+  return pref[String(prefecture_id).padStart(2, '0')];
 }
 
 /**
@@ -179,4 +180,15 @@ function buyPet(selectObj) {
 function getId(selectObj){
   const petId = selectObj.id; // ペットidを取得
   console.log(petId); //「id01」
+}
+
+/**
+ * 経過日数を返す
+ * @param {Date} date - 日時
+ * @returns {Number} - 日数
+ */
+function elapsedDays(date) {
+  let now = new Date();
+  let diff = now.getTime() - date.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
