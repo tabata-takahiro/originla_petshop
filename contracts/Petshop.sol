@@ -89,4 +89,8 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
     function getAllTokens() public view returns (uint256[]) {
         return allTokens;
     }
+
+    function getOwnTokens() public view returns(uint256[]) {
+        return ownedTokens[msg.sender];
+    }
 }
