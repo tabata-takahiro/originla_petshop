@@ -1,4 +1,4 @@
-const address = "0xdb25c116baea2a95f19fcb078ff7a9394ece50b9" // コントラクトのアドレス
+const address = "0x29ffb2c3357eb1ce9fda6cbd2517e573cb673019"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -56,6 +56,11 @@ function init() {
             petTemplate.find('.btn-adopt').attr('disabled', true);
             if (pet[4] > 0)
               petTemplate.find('.btn-adopt').attr('value', "SOLD OUT");
+            else
+              petTemplate.find('.btn-adopt').attr('value', "購入");
+          } else {
+            petTemplate.find('.btn-adopt').attr('disabled', false);
+            petTemplate.find('.btn-adopt').attr('value', "購入");
           }
           petsRow.append(petTemplate.html());
         })
