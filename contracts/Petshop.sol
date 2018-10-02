@@ -7,6 +7,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract Petshop is ERC721Token, ERC721Holder, Ownable{
     uint dnaDigits = 16;
     uint dnaModulus = 10 ** dnaDigits;
+    enum SoldFlg {DEFAULT, SOLD_OUT, EXHIBITION}
     struct Pet {
         // 遺伝子情報
         uint256 genes;
@@ -17,10 +18,10 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         // 売値
         uint256 price;
         // 売り物フラグ
-        uint16 soldFlg;
+        SoldFlg soldFlg;
     }
     Pet[] public pets;
-    uint256 private price = 0.01 ether;
+    uint256 private constant price = 0.01 ether;
     constructor() ERC721Token("Pet", "DG") public {}
 
     modifier onlyOwnerOf(uint256 _tokenId) {
@@ -48,9 +49,9 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         require(seller != msg.sender);
         require(msg.sender.balance >= msg.value);
         require(pets[_petId].price == msg.value);
-        require(pets[_petId].soldFlg == 0);
+        require(pets[_petId].soldFlg == SoldFlg.DEFAULT);
 
-        pets[_petId].soldFlg = 1;
+        pets[_petId].soldFlg = SoldFlg.SOLD_OUT;
         transferFrom(seller, msg.sender, _petId);
         seller.transfer(msg.value);
     }
@@ -65,7 +66,7 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
     }
 
     function _createPet(uint256 _genes) internal returns (uint) {
-        Pet memory _pet = Pet({genes: _genes, name: "", birthTime: uint64(now), price: price, soldFlg: 0});
+        Pet memory _pet = Pet({genes: _genes, name: "", birthTime: uint64(now), price: price, soldFlg: SoldFlg.DEFAULT});
         uint256 newPetId = pets.push(_pet) - 1;
         require(newPetId == uint256(uint32(newPetId)));
 
@@ -81,16 +82,34 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         pets[_petId].name = _newName;
     }
 
-    function getPet(uint _petId) public view returns(uint256, string, uint64, uint256, uint16) {
+    function getPet(uint _petId) public view returns(uint256, string, uint64, uint256, SoldFlg) {
         Pet memory pet = pets[_petId];
         return (pet.genes, pet.name, pet.birthTime, pet.price, pet.soldFlg);
     }
 
+    // 存在する全てのトークンID
     function getAllTokens() public view returns (uint256[]) {
         return allTokens;
     }
 
+    // 自分の所持トークンID
     function getOwnTokens() public view returns(uint256[]) {
         return ownedTokens[msg.sender];
+    }
+
+    // ペットの価格再計算
+    function calcPrice(uint256 _petId) public view returns (uint256 newPrice) {
+        newPrice = uint256(pets[_petId].price / 2);
+    }
+
+    // ペット価格設定
+    function _setPrice(uint256 _petId, uint256 _price) internal {
+        pets[_petId].price = _price;
+    }
+
+    // ペット出品
+    function putPet(uint256 _petId) external onlyOwnerOf(_petId) {
+        pets[_petId].price = calcPrice(_petId);
+        pets[_petId].soldFlg = SoldFlg.EXHIBITION;
     }
 }
