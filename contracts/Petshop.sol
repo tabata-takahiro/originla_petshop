@@ -42,7 +42,7 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         }
     }
 
-    function buyPet(uint _petId) payable public {
+    function buyPet(uint256 _petId) payable public {
         address seller = ownerOf(_petId);
         require(seller != address(0));
         require(seller != address(this));
@@ -102,14 +102,24 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
         newPrice = uint256(pets[_petId].price / 2);
     }
 
-    // ペット価格設定
-    function _setPrice(uint256 _petId, uint256 _price) internal {
-        pets[_petId].price = _price;
-    }
-
     // ペット出品
     function putPet(uint256 _petId) external onlyOwnerOf(_petId) {
+        require(pets[_petId].soldFlg == SoldFlg.SOLD_OUT);
         pets[_petId].price = calcPrice(_petId);
         pets[_petId].soldFlg = SoldFlg.EXHIBITION;
+    }
+
+    function buyExhibitionPet(uint256 _petId) payable public {
+        address seller = ownerOf(_petId);
+        require(seller != address(0));
+        require(seller != address(this));
+        require(seller != msg.sender);
+        require(msg.sender.balance >= msg.value);
+        require(pets[_petId].price == msg.value);
+        require(pets[_petId].soldFlg == SoldFlg.EXHIBITION);
+
+        pets[_petId].soldFlg = SoldFlg.SOLD_OUT;
+        transferFrom(seller, msg.sender, _petId);
+        seller.transfer(msg.value);
     }
 }
