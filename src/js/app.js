@@ -3,53 +3,40 @@ let coinbase = null; // コントラクトを呼び出すアカウントのア�
 let web3js;
 let contract;
 let tokens;
-let isOwner = false;  // コントラクトのオーナーかどうか
+let isOwner = false; // コントラクトのオーナーかどうか
 
 // enum
-var element = {
+const element = {
   // 遺伝子情報
-  genes : 0,
+  genes: 0,
   // 名前
-  name : 1,
+  name: 1,
   // 誕生日
-  birthTime : 2,
+  birthTime: 2,
   // 売値
-  price : 3,
+  price: 3,
   // 売り物フラグ
-  soldFlg : 4,
-}
+  soldFlg: 4
+};
 
 // ペットショップ初期化
 function init() {
-    window.alert("ここはペットショップです");
+  window.alert("ここはペットショップです");
 
-    $.getJSON('Petshop.json', function(data) {
-      if (typeof web3 !== 'undefined') {
-        web3js = new Web3(web3.currentProvider);
-      } else {
-        web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-      }
+  $.getJSON("Petshop.json", function(data) {
+    if (typeof web3 !== "undefined") {
+      web3js = new Web3(web3.currentProvider);
+    } else {
+      web3js = new Web3(
+        new Web3.providers.HttpProvider("http://localhost:7545")
+      );
+    }
 
-      web3js.eth.getAccounts(function(err, accounts) {
-        if (err) return;
-        coinbase = accounts[0];
-        if (typeof coinbase !== 'undefined') {
-          console.log(coinbase);
-        } else {
-          console.log('Please login.');
-        }
-      });
+    contract = web3js.eth.contract(data.abi).at(address);
 
-      contract = web3js.eth.contract(data.abi).at(address);
-
-      contract.owner.call(function(err, result) {
-        isOwner = result == coinbase;
-        if (!isOwner) $('#mint').attr('disabled', true);
-      });
-      
     // ショップのペット取得
     contract.getAllTokens.call(function(err, res) {
-      if(!err) {
+      if (!err) {
         getAllPet(res);
       } else {
         console.log(err);
@@ -61,38 +48,21 @@ function init() {
 // マイペット初期化
 function myPetInit() {
   window.alert("購入済みのペット一覧です");
-  
-  $.getJSON('Petshop.json', function(data) {
 
-    if (typeof web3 !== 'undefined') {
+  $.getJSON("Petshop.json", function(data) {
+    if (typeof web3 !== "undefined") {
       web3js = new Web3(web3.currentProvider);
     } else {
-      web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+      web3js = new Web3(
+        new Web3.providers.HttpProvider("http://localhost:7545")
+      );
     }
-    
-    web3js.eth.getAccounts(function(err, accounts) {
-      
-      if (err) return;
-      
-      coinbase = accounts[0];
-      
-      if (typeof coinbase !== 'undefined') {
-        console.log(coinbase);
-      } else {
-        console.log('Please login.');
-      }
-    });
 
     contract = web3js.eth.contract(data.abi).at(address);
 
-    contract.owner.call(function(err, result) {
-      isOwner = result == coinbase;
-      if (!isOwner) $('#mint').attr('disabled', true);
-    });
-    
     // 購入済みのペット取得
     contract.getOwnTokens.call(function(err, res) {
-      if(!err) {
+      if (!err) {
         getAllPet(res);
       } else {
         console.log(err);
@@ -103,25 +73,17 @@ function myPetInit() {
 
 // ショップor購入者のペットを全て取得
 function getAllPet(res) {
-  
-  let petsRow = $('#petsRow');
-  let petTemplate = $('#petTemplate');
-
+  let petsRow = $("#petsRow");
+  let petTemplate = $("#petTemplate");
   tokens = res;
-  $.getJSON('Petshop.json', function(data) {
-    if (typeof web3 !== 'undefined') {
-      web3js = new Web3(web3.currentProvider);
-    } else {
-      web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-    }
-
+  $.getJSON("Petshop.json", function(data) {
     web3js.eth.getAccounts(function(err, accounts) {
       if (err) return;
       coinbase = accounts[0];
-      if (typeof coinbase !== 'undefined') {
+      if (typeof coinbase !== "undefined") {
         console.log(coinbase);
       } else {
-        console.log('Please login.');
+        console.log("Please login.");
       }
     });
 
@@ -129,117 +91,122 @@ function getAllPet(res) {
 
     contract.owner.call(function(err, result) {
       isOwner = result == coinbase;
-      if (!isOwner) $('#mint').attr('disabled', true);
+      if (!isOwner) $("#mint").attr("disabled", true);
     });
-    
-    if(tokens.length <= 0) {
+
+    if (tokens.length <= 0) {
       window.alert("ペットがいません");
     }
-    
-    for(let i = 0; i < tokens.length; i++) {
-      let token_id = tokens[i];
 
+    for (let i = 0; i < tokens.length; i++) {
+      let token_id = tokens[i];
       contract.getPet(token_id, function(error, result) {
         let pet = result;
         let day = new Date(pet[element.birthTime] * 1000);
         let age = elapsedDays(day);
-        let price = web3js.fromWei(pet[element.price], 'ether');
-        
-        petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
-        petTemplate.find('.panel-title').text(`${pet[element.name]}`);
-        petTemplate.find('img').attr('src', `images/${getBreedKey(pet[element.genes])}.jpeg`);
-        petTemplate.find('.pet-breed').text(getBreed(getBreedKey(pet[element.genes])));
-        petTemplate.find('.pet-age').text(age);
-        petTemplate.find('.pet-location').text(getPrefecture(pet[element.genes]));
-        petTemplate.find('.pet-price').text(price);
-        petTemplate.find('.btn-adopt').attr('id', token_id);
-        petTemplate.find('.btn-adopt').attr('data-price', pet[element.price]);
-        petTemplate.find('.pet-sold').text(pet[element.soldFlg]);
+        let price = web3js.fromWei(pet[element.price], "ether");
 
-        if (/*isOwner || */pet[element.soldFlg] > 0) {
-          petTemplate.find('.btn-adopt').attr('disabled', true);
-          petTemplate.find('.name-adopt').attr('disabled', false);
+        petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
+        petTemplate.find(".panel-title").text(`${pet[element.name]}`);
+        petTemplate
+          .find("img")
+          .attr("src", `images/${getBreedKey(pet[element.genes])}.jpeg`);
+        petTemplate
+          .find(".pet-breed")
+          .text(getBreed(getBreedKey(pet[element.genes])));
+        petTemplate.find(".pet-age").text(age);
+        petTemplate
+          .find(".pet-location")
+          .text(getPrefecture(pet[element.genes]));
+        petTemplate.find(".pet-price").text(price);
+        petTemplate.find(".btn-adopt").attr("id", token_id);
+        petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
+        petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
+
+        if (isOwner || pet[element.soldFlg] > 0) {
+          petTemplate.find(".btn-adopt").attr("disabled", true);
+          petTemplate.find(".name-adopt").attr("disabled", false);
           if (pet[element.soldFlg] > 0)
-          petTemplate.find('.btn-adopt').attr('value', "SOLD OUT");
-          else
-          petTemplate.find('.btn-adopt').attr('value', "購入");
+            petTemplate.find(".btn-adopt").attr("value", "SOLD OUT");
+          else petTemplate.find(".btn-adopt").attr("value", "購入");
         } else {
-          petTemplate.find('.btn-adopt').attr('disabled', false);
-          petTemplate.find('.btn-adopt').attr('value', "購入");
-          petTemplate.find('.name-adopt').attr('disabled', true);
+          petTemplate.find(".btn-adopt").attr("disabled", false);
+          petTemplate.find(".btn-adopt").attr("value", "購入");
+          petTemplate.find(".name-adopt").attr("disabled", true);
         }
-          petsRow.append(petTemplate.html());
-        });
-      }
-    });
-  }
+        petsRow.append(petTemplate.html());
+      });
+    }
+  });
+}
 // ペット生成(オーナーのみ)
 function mint() {
-  contract.mint.sendTransaction({from:coinbase, gas:3000000}, function(err, result){
-    if (!err)
-      console.log(result);
-    else
-      console.log('err:' + err);
+  contract.mint.sendTransaction({ from: coinbase, gas: 3000000 }, function(
+    err,
+    result
+  ) {
+    if (!err) console.log(result);
+    else console.log("err:" + err);
     window.location.reload();
   });
 }
 
 // 都道府県コード
-const pref={
-  '01':'北海道',
-  '02':'青森県',
-  '03':'岩手県',
-  '04':'宮城県',
-  '05':'秋田県',
-  '06':'山形県',
-  '07':'福島県',
-  '08':'茨城県',
-  '09':'栃木県',
-  '10':'群馬県',
-  '11':'埼玉県',
-  '12':'千葉県',
-  '13':'東京都',
-  '14':'神奈川県',
-  '15':'新潟県',
-  '16':'富山県',
-  '17':'石川県',
-  '18':'福井県',
-  '19':'山梨県',
-  '20':'長野県',
-  '21':'岐阜県',
-  '22':'静岡県',
-  '23':'愛知県',
-  '24':'三重県',
-  '25':'滋賀県',
-  '26':'京都府',
-  '27':'大阪府',
-  '28':'兵庫県',
-  '29':'奈良県',
-  '30':'和歌山県',
-  '31':'鳥取県',
-  '32':'島根県',
-  '33':'岡山県',
-  '34':'広島県',
-  '35':'山口県',
-  '36':'徳島県',
-  '37':'香川県',
-  '38':'愛媛県',
-  '39':'高知県',
-  '40':'福岡県',
-  '41':'佐賀県',
-  '42':'長崎県',
-  '43':'熊本県',
-  '44':'大分県',
-  '45':'宮崎県',
-  '46':'鹿児島県',
-  '47':'沖縄県'
+const pref = {
+  "01": "北海道",
+  "02": "青森県",
+  "03": "岩手県",
+  "04": "宮城県",
+  "05": "秋田県",
+  "06": "山形県",
+  "07": "福島県",
+  "08": "茨城県",
+  "09": "栃木県",
+  "10": "群馬県",
+  "11": "埼玉県",
+  "12": "千葉県",
+  "13": "東京都",
+  "14": "神奈川県",
+  "15": "新潟県",
+  "16": "富山県",
+  "17": "石川県",
+  "18": "福井県",
+  "19": "山梨県",
+  "20": "長野県",
+  "21": "岐阜県",
+  "22": "静岡県",
+  "23": "愛知県",
+  "24": "三重県",
+  "25": "滋賀県",
+  "26": "京都府",
+  "27": "大阪府",
+  "28": "兵庫県",
+  "29": "奈良県",
+  "30": "和歌山県",
+  "31": "鳥取県",
+  "32": "島根県",
+  "33": "岡山県",
+  "34": "広島県",
+  "35": "山口県",
+  "36": "徳島県",
+  "37": "香川県",
+  "38": "愛媛県",
+  "39": "高知県",
+  "40": "福岡県",
+  "41": "佐賀県",
+  "42": "長崎県",
+  "43": "熊本県",
+  "44": "大分県",
+  "45": "宮崎県",
+  "46": "鹿児島県",
+  "47": "沖縄県"
 };
 
 const breed = {
-  '0':'Scottish Terrier',
-  '1':'French Bulldog',
-  '2':'Boxer',
-  '3':'Golden Retriever'
+  "0": "Scottish Terrier",
+  "1": "French Bulldog",
+  "2": "Boxer",
+  "3": "Golden Retriever"
 };
 
 /**
@@ -248,8 +215,8 @@ const breed = {
  * @returns {string} - 出身地
  */
 function getPrefecture(dna) {
-  let prefecture_id = String(dna).substring(2, 3)% 47 + 1;
-  return pref[String(prefecture_id).padStart(2, '0')];
+  let prefecture_id = (String(dna).substring(2, 3) % 47) + 1;
+  return pref[String(prefecture_id).padStart(2, "0")];
 }
 
 /**
@@ -263,21 +230,24 @@ function getBreedKey(dna) {
 
 // 犬種キーを元に犬種を返す
 function getBreed(breedKey) {
-  return breed[breedKey]
+  return breed[breedKey];
 }
 
 // ペット購入
 function buyPet(selectObj) {
   let petId = selectObj.id;
-  let price = selectObj.getAttribute('data-price');
+  let price = selectObj.getAttribute("data-price");
   console.log(`${petId}のペットを購入 値段 : ${price} eth`);
-  contract.buyPet.sendTransaction(petId, {value: price, gas:3000000},
-  function(err, result) {
-    if (!err) console.log(result);
-  });
+  contract.buyPet.sendTransaction(
+    petId,
+    { value: price, gas: 3000000 },
+    function(err, result) {
+      if (!err) console.log(result);
+    }
+  );
 }
 
-function getId(selectObj){
+function getId(selectObj) {
   const petId = selectObj.id; // ペットidを取得
   console.log(petId); //「id01」
 }
