@@ -38,3 +38,8 @@ li {
   padding-bottom: 15px;
   margin-bottom: 50px;
 }
+
+.pet {
+  float: left;
+  display: flex;
+}
