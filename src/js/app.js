@@ -1,4 +1,4 @@
-const address = "0x8778efc0fa85868251431b1b86dde416f4e8be6f"; // コントラクトのアドレス
+const address = "0xc0a3ed41960a6e4c5a7ed854dafe24cde37b5961"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -19,29 +19,41 @@ const element = {
   soldFlg: 4
 };
 
+$.getJSON("Petshop.json", function(data) {
+  if (typeof web3 !== "undefined") {
+    web3js = new Web3(web3.currentProvider);
+  } else {
+    web3js = new Web3(
+      new Web3.providers.HttpProvider("http://localhost:7545")
+    );
+  }
+  web3js.eth.getAccounts(function(err, accounts) {
+    if (err) return;
+      coinbase = accounts[0];
+    if (typeof coinbase !== "undefined") {
+      console.log(coinbase);
+    } else {
+      console.log("Please login.");
+    }
+  });
+  contract = web3js.eth.contract(data.abi).at(address);
+  contract.owner.call(function(err, result) {
+    isOwner = result == coinbase;
+    if (!isOwner) $("#mint").attr("disabled", true);
+  });
+});
+
 // ペットショップ初期化
 function init() {
   window.alert("ここはペットショップです");
 
-  $.getJSON("Petshop.json", function(data) {
-    if (typeof web3 !== "undefined") {
-      web3js = new Web3(web3.currentProvider);
+  // ショップのペット取得
+  contract.getAllTokens.call(function(err, res) {
+    if (!err) {
+      getAllPet(res);
     } else {
-      web3js = new Web3(
-        new Web3.providers.HttpProvider("http://localhost:7545")
-      );
+      console.log(err);
     }
-
-    contract = web3js.eth.contract(data.abi).at(address);
-
-    // ショップのペット取得
-    contract.getAllTokens.call(function(err, res) {
-      if (!err) {
-        getAllPet(res);
-      } else {
-        console.log(err);
-      }
-    });
   });
 }
 
@@ -49,25 +61,13 @@ function init() {
 function myPetInit() {
   window.alert("購入済みのペット一覧です");
 
-  $.getJSON("Petshop.json", function(data) {
-    if (typeof web3 !== "undefined") {
-      web3js = new Web3(web3.currentProvider);
+   // 購入済みのペット取得
+  contract.getOwnTokens.call(function(err, res) {
+    if (!err) {
+      getAllPet(res);
     } else {
-      web3js = new Web3(
-        new Web3.providers.HttpProvider("http://localhost:7545")
-      );
+      console.log(err);
     }
-
-    contract = web3js.eth.contract(data.abi).at(address);
-
-    // 購入済みのペット取得
-    contract.getOwnTokens.call(function(err, res) {
-      if (!err) {
-        getAllPet(res);
-      } else {
-        console.log(err);
-      }
-    });
   });
 }
 
@@ -76,68 +76,51 @@ function getAllPet(res) {
   let petsRow = $("#petsRow");
   let petTemplate = $("#petTemplate");
   tokens = res;
-  $.getJSON("Petshop.json", function(data) {
-    web3js.eth.getAccounts(function(err, accounts) {
-      if (err) return;
-      coinbase = accounts[0];
-      if (typeof coinbase !== "undefined") {
-        console.log(coinbase);
+
+  if (tokens.length <= 0) {
+    window.alert("ペットがいません");
+  }
+
+  petsRow.empty();
+  for (let i = 0; i < tokens.length; i++) {
+    let token_id = tokens[i];
+    contract.getPet(token_id, function(error, result) {
+      let pet = result;
+      let day = new Date(pet[element.birthTime] * 1000);
+      let age = elapsedDays(day);
+      let price = web3js.fromWei(pet[element.price], "ether");
+
+      petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
+      petTemplate.find(".panel-title").text(`${pet[element.name]}`);
+      petTemplate
+        .find("img")
+        .attr("src", `images/${getBreedKey(pet[element.genes])}.jpeg`);
+      petTemplate
+        .find(".pet-breed")
+        .text(getBreed(getBreedKey(pet[element.genes])));
+      petTemplate.find(".pet-age").text(age);
+      petTemplate
+        .find(".pet-location")
+        .text(getPrefecture(pet[element.genes]));
+      petTemplate.find(".pet-price").text(price);
+      petTemplate.find(".btn-adopt").attr("id", token_id);
+      petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
+      petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
+
+      if (isOwner || pet[element.soldFlg] > 0) {
+        petTemplate.find(".btn-adopt").attr("disabled", true);
+        petTemplate.find(".name-adopt").attr("disabled", false);
+        if (pet[element.soldFlg] > 0)
+          petTemplate.find(".btn-adopt").attr("value", "SOLD OUT");
+        else petTemplate.find(".btn-adopt").attr("value", "購入");
       } else {
-        console.log("Please login.");
+        petTemplate.find(".btn-adopt").attr("disabled", false);
+        petTemplate.find(".btn-adopt").attr("value", "購入");
+        petTemplate.find(".name-adopt").attr("disabled", true);
       }
+      petsRow.append(petTemplate.html());
     });
-
-    contract = web3js.eth.contract(data.abi).at(address);
-
-    contract.owner.call(function(err, result) {
-      isOwner = result == coinbase;
-      if (!isOwner) $("#mint").attr("disabled", true);
-    });
-
-    if (tokens.length <= 0) {
-      window.alert("ペットがいません");
-    }
-
-    for (let i = 0; i < tokens.length; i++) {
-      let token_id = tokens[i];
-      contract.getPet(token_id, function(error, result) {
-        let pet = result;
-        let day = new Date(pet[element.birthTime] * 1000);
-        let age = elapsedDays(day);
-        let price = web3js.fromWei(pet[element.price], "ether");
-
-        petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
-        petTemplate.find(".panel-title").text(`${pet[element.name]}`);
-        petTemplate
-          .find("img")
-          .attr("src", `images/${getBreedKey(pet[element.genes])}.jpeg`);
-        petTemplate
-          .find(".pet-breed")
-          .text(getBreed(getBreedKey(pet[element.genes])));
-        petTemplate.find(".pet-age").text(age);
-        petTemplate
-          .find(".pet-location")
-          .text(getPrefecture(pet[element.genes]));
-        petTemplate.find(".pet-price").text(price);
-        petTemplate.find(".btn-adopt").attr("id", token_id);
-        petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
-        petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
-
-        if (isOwner || pet[element.soldFlg] > 0) {
-          petTemplate.find(".btn-adopt").attr("disabled", true);
-          petTemplate.find(".name-adopt").attr("disabled", false);
-          if (pet[element.soldFlg] > 0)
-            petTemplate.find(".btn-adopt").attr("value", "SOLD OUT");
-          else petTemplate.find(".btn-adopt").attr("value", "購入");
-        } else {
-          petTemplate.find(".btn-adopt").attr("disabled", false);
-          petTemplate.find(".btn-adopt").attr("value", "購入");
-          petTemplate.find(".name-adopt").attr("disabled", true);
-        }
-        petsRow.append(petTemplate.html());
-      });
-    }
-  });
+  }
 }
 // ペット生成(オーナーのみ)
 function mint() {
