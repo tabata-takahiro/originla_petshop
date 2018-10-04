@@ -50,7 +50,7 @@ function init() {
   // ショップのペット取得
   contract.getAllTokens.call(function(err, res) {
     if (!err) {
-      getAllPet(res);
+      getAllPet(res, "販売中ペット一覧");
     } else {
       console.log(err);
     }
@@ -64,7 +64,7 @@ function myPetInit() {
    // 購入済みのペット取得
   contract.getOwnTokens.call(function(err, res) {
     if (!err) {
-      getAllPet(res);
+      getAllPet(res, "購入済みペット一覧");
     } else {
       console.log(err);
     }
@@ -72,7 +72,7 @@ function myPetInit() {
 }
 
 // ショップor購入者のペットを全て取得
-function getAllPet(res) {
+function getAllPet(res, title) {
   let petsRow = $("#petsRow");
   let petTemplate = $("#petTemplate");
   tokens = res;
@@ -80,7 +80,7 @@ function getAllPet(res) {
   if (tokens.length <= 0) {
     window.alert("ペットがいません");
   }
-
+  $("#section-title").text(title);
   petsRow.empty();
   for (let i = 0; i < tokens.length; i++) {
     let token_id = tokens[i];
