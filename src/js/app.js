@@ -1,4 +1,4 @@
-const address = "0x8778efc0fa85868251431b1b86dde416f4e8be6f"; // コントラクトのアドレス
+const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -102,6 +102,7 @@ function getAllPet(res, title) {
       petTemplate.find(".btn-adopt").attr("id", token_id);
       petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
       petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
+      petTemplate.find(".name-adopt").attr("id", token_id);
 
       if (isOwner || pet[element.soldFlg] > 0) {
         petTemplate.find(".btn-adopt").attr("disabled", true);
@@ -243,7 +244,12 @@ function elapsedDays(date) {
 }
 
 // 入力された名前を取得する
-function getValue(name) {
+function setName(selectObj ,name) {
+  console.log(selectObj);
+  let petId = selectObj.id;
   let inputName = document.getElementById(name).value;
-  alert(`入力された名前は${inputName}です`);
+  alert(`${petId}の名前は${inputName}です`);
+  contract.changeName.sendTransaction(petId, inputName, function(err, result) {
+    if (!err) console.log(result);
+  });
 }

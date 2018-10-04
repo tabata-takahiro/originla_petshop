@@ -46,10 +46,8 @@
             <img alt="40x40" data-src="holder.js/40x40" class="img-rounded img-center" style="width: 80%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg"
               data-holder-rendered="true">
             <br /><br />
-            <input class="name-input" type="text" id="txt1" value="名前">
-            <input class="name-adopt" type="button" value="ボタン" onclick="getValue('txt1');">
-            <!--input class="name-input" type="text" id="name" name="pet_name" /-->
-            <!--input class="name-adopt" type="button" id="id01" data-price="0" value="名前を付ける" onclick= /-->
+            <input class="name-input" type="text" id="txt1" value="">
+            <input class="name-adopt" type="button" id="id01" value="名前をつける" onclick="setName(this, 'txt1');">
             <input class="btn-adopt" type="button" id="id01" data-price="0" value="購入" onclick="buyPet(this);" />
             <br /><br />
             <strong>犬種</strong>: <span class="pet-breed">Golden Retriever</span><br />
