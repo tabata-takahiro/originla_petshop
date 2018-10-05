@@ -1,4 +1,4 @@
-const address = "0xc0a3ed41960a6e4c5a7ed854dafe24cde37b5961"; // コントラクトのアドレス
+const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -23,13 +23,11 @@ $.getJSON("Petshop.json", function(data) {
   if (typeof web3 !== "undefined") {
     web3js = new Web3(web3.currentProvider);
   } else {
-    web3js = new Web3(
-      new Web3.providers.HttpProvider("http://localhost:7545")
-    );
+    web3js = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
   }
   web3js.eth.getAccounts(function(err, accounts) {
     if (err) return;
-      coinbase = accounts[0];
+    coinbase = accounts[0];
     if (typeof coinbase !== "undefined") {
       console.log(coinbase);
     } else {
@@ -61,7 +59,7 @@ function init() {
 function myPetInit() {
   window.alert("購入済みのペット一覧です");
 
-   // 購入済みのペット取得
+  // 購入済みのペット取得
   contract.getOwnTokens.call(function(err, res) {
     if (!err) {
       getAllPet(res, "購入済みペット一覧");
@@ -99,13 +97,12 @@ function getAllPet(res, title) {
         .find(".pet-breed")
         .text(getBreed(getBreedKey(pet[element.genes])));
       petTemplate.find(".pet-age").text(age);
-      petTemplate
-        .find(".pet-location")
-        .text(getPrefecture(pet[element.genes]));
+      petTemplate.find(".pet-location").text(getPrefecture(pet[element.genes]));
       petTemplate.find(".pet-price").text(price);
       petTemplate.find(".btn-adopt").attr("id", token_id);
       petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
       petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
+      petTemplate.find(".name-adopt").attr("id", token_id);
 
       if (isOwner || pet[element.soldFlg] > 0) {
         petTemplate.find(".btn-adopt").attr("disabled", true);
@@ -244,4 +241,14 @@ function elapsedDays(date) {
   let now = new Date();
   let diff = now.getTime() - date.getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+// 入力された名前を取得する
+function setName(selectObj ,name) {
+  let petId = selectObj.id;
+  let inputName = document.getElementById(name).value;
+  alert(`${petId}の名前は${inputName}です`);
+  contract.changeName.sendTransaction(petId, inputName, function(err, result) {
+    if (!err) console.log(result);
+  });
 }

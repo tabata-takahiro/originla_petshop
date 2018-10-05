@@ -1,61 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>PetShop</title>
-    <link href="css/stylesheet.css" rel="stylesheet">
-    <script src="js/web3.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript" src="js/truffle-contract.js"></script>
-    <script type="text/javascript" src="js/app.js"></script>
-  </head>
-  <body>
-    <input type="button" name="pet-shop" value="ペットショップへ" onClick="init()">
-    <input type="button" name="my-pet" value="犬小屋へ" onClick="myPetInit()">
-    <!--input type="button" name="debug-log" value="ペットデータ確認" onClick=""-->
-    <input id="mint" type="button" name="mint" value="ペット生成" onClick="mint()">
-    <div id="output"></div>
 
-    <div class="header">
-      <div class="header-logo">PetShop</div>
-      
-      <div class="header-list">
-        <ul>
-          <li>ペット一覧</li>
-          <li>お問い合わせ</li>
-        </ul>
-      </div>
+<head>
+  <meta charset="UTF-8">
+  <title>PetShop</title>
+  <link href="css/stylesheet.css" rel="stylesheet">
+  <script src="js/web3.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script type="text/javascript" src="js/truffle-contract.js"></script>
+  <script type="text/javascript" src="js/app.js"></script>
+</head>
+
+<body>
+  <input type="button" name="pet-shop" value="ペットショップへ" onClick="init()">
+  <input type="button" name="my-pet" value="犬小屋へ" onClick="myPetInit()">
+  <!--input type="button" name="debug-log" value="ペットデータ確認" onClick=""-->
+  <input id="mint" type="button" name="mint" value="ペット生成" onClick="mint()">
+  <div id="output"></div>
+
+  <div class="header">
+    <div class="header-logo">PetShop</div>
+
+    <div class="header-list">
+      <ul>
+        <li>ペット一覧</li>
+        <li>お問い合わせ</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h2 class="section-title" id="section-title">販売ペット一覧</h2>
+
+    <div id="petsRow" class="row">
     </div>
 
-    <div class="contents">
-      <h2 class="section-title" id="section-title">販売ペット一覧</h2>
-
-      <div id="petsRow" class="row">
-      </div>
-
-      <div id="petTemplate" style="display: none;">
-        <div class="pet">
-          <div class="panel">
-            <div class="panel-heading">
-              <h2 class="pet-id">1</h2>
-              <h3 class="panel-title">Scrappy</h3>
-            </div>
-            <div class="panel-body">
-              <img alt="40x40" data-src="holder.js/40x40" class="img-rounded img-center" style="width: 80%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg" data-holder-rendered="true">
-              <br/><br/>
-              <input class="name-input" type="text" id="name" name="pet_name" />
-              <input class="name-adopt" type="button" id="id01" data-price="0" value="名前を付ける" onclick=/>
-              <input class="btn-adopt" type="button" id="id01" data-price="0" value="購入" onclick="buyPet(this);"/>
-              <br/><br/>
-              <strong>犬種</strong>: <span class="pet-breed">Golden Retriever</span><br/>
-              <strong>年齢</strong>: <span class="pet-age">3</span>日<br/>
-              <strong>出身</strong>: <span class="pet-location">Warren, MI</span><br/><br/>
-              <strong>値段</strong>: <span class="pet-price">Warren, MI</span>ETH<br/><br/>
-              <strong>購入フラグ</strong>: <span class="pet-sold">Warren, MI</span><br/><br/>
-            </div>
+    <div id="petTemplate" style="display: none;">
+      <div class="pet">
+        <div class="panel">
+          <div class="panel-heading">
+            <h2 class="pet-id">1</h2>
+            <h3 class="panel-title">Scrappy</h3>
+          </div>
+          <div class="panel-body">
+            <img alt="40x40" data-src="holder.js/40x40" class="img-rounded img-center" style="width: 80%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg"
+              data-holder-rendered="true">
+            <br /><br />
+            <input class="name-input" type="text" id="txt1" value="">
+            <input class="name-adopt" type="button" id="id01" value="名前をつける" onclick="setName(this, 'txt1');">
+            <input class="btn-adopt" type="button" id="id01" data-price="0" value="購入" onclick="buyPet(this);" />
+            <br /><br />
+            <strong>犬種</strong>: <span class="pet-breed">Golden Retriever</span><br />
+            <strong>年齢</strong>: <span class="pet-age">3</span>日<br />
+            <strong>出身</strong>: <span class="pet-location">Warren, MI</span><br /><br />
+            <strong>値段</strong>: <span class="pet-price">Warren, MI</span>ETH<br /><br />
+            <strong>購入フラグ</strong>: <span class="pet-sold">Warren, MI</span><br /><br />
           </div>
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
