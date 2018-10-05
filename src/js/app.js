@@ -245,7 +245,6 @@ function elapsedDays(date) {
 
 // 入力された名前を取得する
 function setName(selectObj ,name) {
-  console.log(selectObj);
   let petId = selectObj.id;
   let inputName = document.getElementById(name).value;
   alert(`${petId}の名前は${inputName}です`);
