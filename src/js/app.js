@@ -1,4 +1,4 @@
-const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf"; // コントラクトのアドレス
+const address = "0x48bc71a6b5fbab49b9e1a7b2a723a37c8fdea410"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -127,7 +127,7 @@ function mint() {
   ) {
     if (!err) console.log(result);
     else console.log("err:" + err);
-    window.location.reload();
+    init();
   });
 }
 
@@ -223,6 +223,7 @@ function buyPet(selectObj) {
     { value: price, gas: 3000000 },
     function(err, result) {
       if (!err) console.log(result);
+      myPetInit();
     }
   );
 }
@@ -250,5 +251,6 @@ function setName(selectObj ,name) {
   alert(`${petId}の名前は${inputName}です`);
   contract.changeName.sendTransaction(petId, inputName, function(err, result) {
     if (!err) console.log(result);
+    myPetInit();
   });
 }
