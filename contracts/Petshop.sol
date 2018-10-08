@@ -3,8 +3,10 @@ pragma solidity ^0.4.24;
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Holder.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Petshop is ERC721Token, ERC721Holder, Ownable{
+    using SafeMath for uint256;
     uint dnaDigits = 16;
     uint dnaModulus = 10 ** dnaDigits;
     enum SoldFlg {DEFAULT, SOLD_OUT, EXHIBITION}
@@ -99,11 +101,13 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
 
     // ペットの価格再計算
     function calcPrice(uint256 _petId) public view returns (uint256 newPrice) {
-        newPrice = uint256(pets[_petId].price / 2);
+//        newPrice = uint256(pets[_petId].price / 2);
+        newPrice = pets[_petId].price.div(2);
     }
 
     // ペット出品
     function putPet(uint256 _petId) external onlyOwnerOf(_petId) {
+        require(ownerOf(_petId) != owner);
         require(pets[_petId].soldFlg == SoldFlg.SOLD_OUT);
         pets[_petId].price = calcPrice(_petId);
         pets[_petId].soldFlg = SoldFlg.EXHIBITION;
