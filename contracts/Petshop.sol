@@ -101,13 +101,14 @@ contract Petshop is ERC721Token, ERC721Holder, Ownable{
 
     // ペットの価格再計算
     function calcPrice(uint256 _petId) public view returns (uint256 newPrice) {
-//        newPrice = uint256(pets[_petId].price / 2);
         newPrice = pets[_petId].price.div(2);
     }
 
     // ペット出品
     function putPet(uint256 _petId) external onlyOwnerOf(_petId) {
+        // 管理者のペットは不可
         require(ownerOf(_petId) != owner);
+        // 売却フラグがSOLD_OUTのもののみ
         require(pets[_petId].soldFlg == SoldFlg.SOLD_OUT);
         pets[_petId].price = calcPrice(_petId);
         pets[_petId].soldFlg = SoldFlg.EXHIBITION;
