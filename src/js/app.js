@@ -1,9 +1,10 @@
-const address = "0x48bc71a6b5fbab49b9e1a7b2a723a37c8fdea410"; // コントラクトのアドレス
+const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
 let tokens;
 let isOwner = false; // コントラクトのオーナーかどうか
+let isShop = false; // ショップページかどうか
 
 // enum
 const element = {
@@ -37,6 +38,7 @@ $.getJSON("Petshop.json", function(data) {
   contract = web3js.eth.contract(data.abi).at(address);
   contract.owner.call(function(err, result) {
     isOwner = result == coinbase;
+    console.log(`isowner : ${isOwner} result : ${result}`);
     if (!isOwner) $("#mint").attr("disabled", true);
   });
 });
@@ -44,6 +46,7 @@ $.getJSON("Petshop.json", function(data) {
 // ペットショップ初期化
 function init() {
   window.alert("ここはペットショップです");
+  isShop = true;
 
   // ショップのペット取得
   contract.getAllTokens.call(function(err, res) {
@@ -58,6 +61,7 @@ function init() {
 // マイペット初期化
 function myPetInit() {
   window.alert("購入済みのペット一覧です");
+  isShop = false;
 
   // 購入済みのペット取得
   contract.getOwnTokens.call(function(err, res) {
@@ -88,37 +92,56 @@ function getAllPet(res, title) {
       let age = elapsedDays(day);
       let price = web3js.fromWei(pet[element.price], "ether");
 
-      petTemplate.find(`.pet-id`).text(`No : ${Number(token_id) + 1}`);
-      petTemplate.find(".panel-title").text(`${pet[element.name]}`);
-      petTemplate
-        .find("img")
-        .attr("src", `images/${getBreedKey(pet[element.genes])}.jpeg`);
-      petTemplate
-        .find(".pet-breed")
-        .text(getBreed(getBreedKey(pet[element.genes])));
+      petTemplate.find(".pet-id").text(`No : ${Number(token_id) + 1}`);
+      petTemplate.find(".pet-name").text(`${pet[element.name]}`);
+      petTemplate.find("img").attr("src", `images/${getBreedKey(pet[element.genes])}.jpeg`);
+      petTemplate.find(".pet-breed").text(getBreed(getBreedKey(pet[element.genes])));
       petTemplate.find(".pet-age").text(age);
       petTemplate.find(".pet-location").text(getPrefecture(pet[element.genes]));
       petTemplate.find(".pet-price").text(price);
       petTemplate.find(".btn-adopt").attr("id", token_id);
       petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
       petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
+      petTemplate.find(".petOwner").text(coinbase);
       petTemplate.find(".name-adopt").attr("id", token_id);
 
-      if (isOwner || pet[element.soldFlg] > 0) {
-        petTemplate.find(".btn-adopt").attr("disabled", true);
-        petTemplate.find(".name-adopt").attr("disabled", false);
-        if (pet[element.soldFlg] > 0)
-          petTemplate.find(".btn-adopt").attr("value", "SOLD OUT");
-        else petTemplate.find(".btn-adopt").attr("value", "購入");
+      if(isShop) {
+        if(pet[element.soldFlg] > 0) {
+          switchDisplay(petTemplate, true);
+        } else {
+          switchDisplay(petTemplate, false);
+        }
+        if(isOwner) {
+          petTemplate.find(".btn-adopt").attr("disabled", true);
+          petTemplate.find(".name-adopt").attr("disabled", true);
+        } else {
+          petTemplate.find(".name-adopt").attr("disabled", true);
+        }
       } else {
-        petTemplate.find(".btn-adopt").attr("disabled", false);
-        petTemplate.find(".btn-adopt").attr("value", "購入");
+        if(pet[element.soldFlg] > 0) {
+          switchDisplay(petTemplate, false);
+        } else {
+          switchDisplay(petTemplate, true);
+        }
+        if(!isOwner) petTemplate.find(".name-adopt").attr("disabled", false);
+      }
+
+      if(isOwner) {
+        petTemplate.find(".btn-adopt").attr("disabled", true);
         petTemplate.find(".name-adopt").attr("disabled", true);
       }
       petsRow.append(petTemplate.html());
     });
   }
 }
+
+// 購入状態で表示切り替え
+function switchDisplay(petTemplate, isSold) {
+  let display = "";
+  if(isSold) display = "none";
+  petTemplate.find(".panel-body").attr("style", `display: ${display};`);
+}
+
 // ペット生成(オーナーのみ)
 function mint() {
   contract.mint.sendTransaction({ from: coinbase, gas: 3000000 }, function(
