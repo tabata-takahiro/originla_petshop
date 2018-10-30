@@ -1,4 +1,4 @@
-const address = "0xa44c409f15792cb8630bc140db735faa6bbc84cf"; // コントラクトのアドレス
+const address = "0xd8d3f512db8a64625529b60fc66c09893a6dc887"; // コントラクトのアドレス
 let coinbase = null; // コントラクトを呼び出すアカウントのアドレス
 let web3js;
 let contract;
@@ -102,8 +102,12 @@ function getAllPet(res, title) {
       petTemplate.find(".btn-adopt").attr("id", token_id);
       petTemplate.find(".btn-adopt").attr("data-price", pet[element.price]);
       petTemplate.find(".pet-sold").text(pet[element.soldFlg]);
-      petTemplate.find(".petOwner").text(coinbase);
       petTemplate.find(".name-adopt").attr("id", token_id);
+      contract.ownerOf.call(token_id, function(err, result) {
+        if (!err) console.log(result);
+        else console.log("err:" + err);
+        petTemplate.find(".pet-owner").text(result);
+      });
 
       if(isShop) {
         if(pet[element.soldFlg] > 0) {
@@ -118,6 +122,7 @@ function getAllPet(res, title) {
           petTemplate.find(".name-adopt").attr("disabled", true);
         }
       } else {
+        petTemplate.find(".btn-adopt").attr("disabled", true);
         if(pet[element.soldFlg] > 0) {
           switchDisplay(petTemplate, false);
         } else {
@@ -249,6 +254,15 @@ function buyPet(selectObj) {
       myPetInit();
     }
   );
+}
+
+function putPet(selectObj) {
+  let petId = selectObj.id;
+  contract.putPet.sendTransaction(petId, function(err, result) {
+    if (!err) console.log(result);
+    else console.log("err:" + err);
+    init();
+  });
 }
 
 function getId(selectObj) {
